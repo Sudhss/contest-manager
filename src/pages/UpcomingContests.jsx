@@ -1,21 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ContestTable from '../components/ContestTable';
-import AddContestModal from '../components/AddContestModal';
-import { Plus } from 'lucide-react';
 
 const UpcomingContests = ({ 
   contests, 
   searchTerm, 
-  platformFilter, 
-  onAddContest, 
-  onUpdateContest, 
-  onDeleteContest, 
-  onMarkAsDone,
-  onMarkAsSkipped 
+  platformFilter
 }) => {
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  const upcomingContests = contests.filter(contest => !contest.done && !contest.skipped);
+  // Filter upcoming contests (date is in the future)
+  const now = new Date();
+  const upcomingContests = contests.filter(contest => {
+    const contestDate = new Date(contest.date);
+    return contestDate > now;
+  });
 
   const filteredContests = upcomingContests.filter(contest => {
     const matchesSearch = contest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,13 +29,6 @@ const UpcomingContests = ({
             {filteredContests.length} contest{filteredContests.length !== 1 ? 's' : ''} scheduled
           </p>
         </div>
-        <button 
-          className="add-contest-btn"
-          onClick={() => setShowAddModal(true)}
-        >
-          <Plus size={20} />
-          Add Contest
-        </button>
       </div>
 
       {/* Color Legend */}
@@ -56,30 +45,15 @@ const UpcomingContests = ({
           </div>
           <div className="legend-item">
             <div className="legend-color later"></div>
-            <span>Later (> 7 days)</span>
-          </div>
-          <div className="legend-item">
-            <div className="legend-color skipped"></div>
-            <span>Skipped</span>
+            <span>Later (&gt; 7 days)</span>
           </div>
         </div>
       </div>
 
       <ContestTable
         contests={filteredContests}
-        onUpdate={onUpdateContest}
-        onDelete={onDeleteContest}
-        onMarkAsDone={onMarkAsDone}
-        onMarkAsSkipped={onMarkAsSkipped}
-        showActions={true}
+        showActions={false}
       />
-
-      {showAddModal && (
-        <AddContestModal
-          onClose={() => setShowAddModal(false)}
-          onAdd={onAddContest}
-        />
-      )}
     </div>
   );
 };

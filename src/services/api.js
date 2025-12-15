@@ -1,110 +1,69 @@
-// Auto-detect the correct API URL
-const getApiBaseUrl = () => {
-  // If running on localhost, use localhost
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:5000/api';
-  }
-  // If running on GitHub Pages, use a placeholder (you'll need to deploy backend separately)
-  if (window.location.hostname === 'sudhanshu-shukl.github.io') {
-    // For now, return a mock URL to prevent errors
-    return 'https://jsonplaceholder.typicode.com/posts'; // Temporary mock API
-  }
-  // If running on your local IP, use the same IP for API
-  return `http://${window.location.hostname}:5000/api`;
-};
-
-const API_BASE_URL = getApiBaseUrl();
+// Fetch contests directly from external APIs
+import { fetchCodeforcesContests } from './codeforces.js';
+import { fetchAtCoderContests } from './atcoder.js';
+import { fetchLeetCodeContests } from './leetcode.js';
 
 class ApiService {
-  async request(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    };
-
+  // Fetch all contests from all platforms
+  async getContests() {
     try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      // Fetch from all platforms in parallel
+      const [codeforcesContests, atcoderContests, leetcodeContests] = await Promise.allSettled([
+        fetchCodeforcesContests(),
+        fetchAtCoderContests(),
+        fetchLeetCodeContests()
+      ]);
+
+      // Extract results (handle both fulfilled and rejected promises)
+      const codeforces = codeforcesContests.status === 'fulfilled' ? codeforcesContests.value : [];
+      const atcoder = atcoderContests.status === 'fulfilled' ? atcoderContests.value : [];
+      const leetcode = leetcodeContests.status === 'fulfilled' ? leetcodeContests.value : [];
+
+      // Log any failures for debugging
+      if (codeforcesContests.status === 'rejected') {
+        console.error('Codeforces fetch failed:', codeforcesContests.reason);
       }
-      
-      return await response.json();
+      if (atcoderContests.status === 'rejected') {
+        console.error('AtCoder fetch failed:', atcoderContests.reason);
+      }
+      if (leetcodeContests.status === 'rejected') {
+        console.error('LeetCode fetch failed:', leetcodeContests.reason);
+      }
+
+      console.log(`Fetched: ${codeforces.length} Codeforces, ${atcoder.length} AtCoder, ${leetcode.length} LeetCode contests`);
+
+      // Combine all contests and sort by date
+      const allContests = [
+        ...codeforces,
+        ...atcoder,
+        ...leetcode
+      ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      return allContests;
     } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+      console.error('Failed to fetch contests:', error);
+      return [];
     }
   }
 
-  // Contest CRUD operations
-  async getContests() {
-    return this.request('/contests');
-  }
-
+  // Get only upcoming contests (not done, not skipped, and in the future)
   async getUpcomingContests() {
-    return this.request('/contests/upcoming');
+    const allContests = await this.getContests();
+    const now = new Date();
+    return allContests.filter(contest => {
+      const contestDate = new Date(contest.date);
+      return !contest.done && !contest.skipped && contestDate > now;
+    });
   }
 
+  // Get past contests (done, skipped, or date has passed)
   async getPastContests() {
-    return this.request('/contests/past');
-  }
-
-  async getContest(id) {
-    return this.request(`/contests/${id}`);
-  }
-
-  async createContest(contestData) {
-    return this.request('/contests', {
-      method: 'POST',
-      body: JSON.stringify(contestData),
+    const allContests = await this.getContests();
+    const now = new Date();
+    return allContests.filter(contest => {
+      const contestDate = new Date(contest.date);
+      return contest.done || contest.skipped || contestDate <= now;
     });
-  }
-
-  async updateContest(id, contestData) {
-    return this.request(`/contests/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(contestData),
-    });
-  }
-
-  async markContestAsDone(id, questionsSolved) {
-    return this.request(`/contests/${id}/mark-done`, {
-      method: 'PUT',
-      body: JSON.stringify({ questionsSolved }),
-    });
-  }
-
-  async markContestAsSkipped(id) {
-    return this.request(`/contests/${id}/mark-skipped`, {
-      method: 'PUT',
-    });
-  }
-
-  async deleteContest(id) {
-    return this.request(`/contests/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
-  async getContestStats() {
-    return this.request('/contests/stats/summary');
-  }
-
-  // Import Codeforces upcoming contests
-  async importCodeforces() {
-    return this.request('/contests/import/codeforces', {
-      method: 'POST'
-    });
-  }
-
-  // Health check
-  async healthCheck() {
-    return this.request('/health');
   }
 }
 

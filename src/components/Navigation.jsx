@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Search, Download, Upload, Trophy, Clock } from 'lucide-react';
+import React from 'react';
+import { Search, Download, RefreshCw, Trophy } from 'lucide-react';
 
 const Navigation = ({ 
   searchTerm, 
@@ -8,28 +7,9 @@ const Navigation = ({
   platformFilter, 
   setPlatformFilter, 
   onExport, 
-  onImport 
+  onRefresh,
+  loading = false
 }) => {
-  const location = useLocation();
-  const [importFile, setImportFile] = useState(null);
-
-  const handleImport = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const importedData = JSON.parse(e.target.result);
-          onImport(importedData);
-          event.target.value = '';
-        } catch (error) {
-          alert('Invalid JSON file');
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
-
   const platforms = ['All', 'LeetCode', 'Codeforces', 'AtCoder', 'HackerRank', 'CodeChef'];
 
   return (
@@ -38,23 +18,6 @@ const Navigation = ({
         <div className="nav-brand">
           <Trophy className="brand-icon" />
           <span>Contest Tracker</span>
-        </div>
-
-        <div className="nav-tabs">
-          <Link 
-            to="/" 
-            className={`nav-tab ${location.pathname === '/' ? 'active' : ''}`}
-          >
-            <Clock size={18} />
-            Upcoming
-          </Link>
-          <Link 
-            to="/past" 
-            className={`nav-tab ${location.pathname === '/past' ? 'active' : ''}`}
-          >
-            <Trophy size={18} />
-            Past Contests
-          </Link>
         </div>
 
         <div className="nav-controls">
@@ -80,18 +43,17 @@ const Navigation = ({
           </select>
 
           <div className="action-buttons">
+            <button 
+              onClick={onRefresh} 
+              className="action-btn" 
+              title="Refresh Contests"
+              disabled={loading}
+            >
+              <RefreshCw size={18} className={loading ? 'spinning' : ''} />
+            </button>
             <button onClick={onExport} className="action-btn" title="Export Data">
               <Download size={18} />
             </button>
-            <label className="action-btn" title="Import Data">
-              <Upload size={18} />
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImport}
-                style={{ display: 'none' }}
-              />
-            </label>
           </div>
         </div>
       </div>

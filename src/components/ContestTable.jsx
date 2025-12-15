@@ -1,26 +1,13 @@
-import React, { useState } from 'react';
-import { Edit2, Trash2, CheckCircle, XCircle, ExternalLink, Calendar, Clock } from 'lucide-react';
-import EditContestModal from './EditContestModal';
-import MarkDoneModal from './MarkDoneModal';
-import SkipContestModal from './SkipContestModal';
+import React from 'react';
+import { ExternalLink, Calendar, Clock } from 'lucide-react';
 
 const ContestTable = ({ 
   contests, 
-  onUpdate, 
-  onDelete, 
-  onMarkAsDone, 
-  onMarkAsSkipped,
-  showActions = true,
+  showActions = false,
   showPerformance = false 
 }) => {
-  const [editingContest, setEditingContest] = useState(null);
-  const [markingDone, setMarkingDone] = useState(null);
-  const [markingSkipped, setMarkingSkipped] = useState(null);
 
   const getContestStatus = (contest) => {
-    if (contest.done) return 'completed';
-    if (contest.skipped) return 'skipped';
-    
     // Use the stored Date directly (interpreted in local timezone)
     const contestDateTime = contest.date instanceof Date ? contest.date : new Date(contest.date);
     
@@ -93,38 +80,6 @@ const ContestTable = ({
                     {contest.platform}
                   </span>
                 </div>
-                {showActions && (
-                  <div className="contest-actions">
-                    <button
-                      className="action-btn small"
-                      onClick={() => setEditingContest(contest)}
-                      title="Edit Contest"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      className="action-btn small danger"
-                      onClick={() => onDelete(contest._id)}
-                      title="Delete Contest"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                    <button
-                      className="action-btn small success"
-                      onClick={() => setMarkingDone(contest)}
-                      title="Mark as Done"
-                    >
-                      <CheckCircle size={16} />
-                    </button>
-                    <button
-                      className="action-btn small warning"
-                      onClick={() => setMarkingSkipped(contest)}
-                      title="Skip Contest"
-                    >
-                      <XCircle size={16} />
-                    </button>
-                  </div>
-                )}
               </div>
 
               <div className="contest-details">
@@ -149,47 +104,10 @@ const ContestTable = ({
                 </div>
               </div>
 
-              {showPerformance && (contest.questionsSolved !== null || contest.skipped) && (
-                <div className="performance-badge">
-                  {contest.skipped ? (
-                    <span className="contest-skipped">
-                      Skipped
-                    </span>
-                  ) : (
-                    <span className="questions-solved">
-                      {contest.questionsSolved} questions solved
-                    </span>
-                  )}
-                </div>
-              )}
             </div>
           ))}
         </div>
       </div>
-
-      {editingContest && (
-        <EditContestModal
-          contest={editingContest}
-          onClose={() => setEditingContest(null)}
-          onUpdate={onUpdate}
-        />
-      )}
-
-      {markingDone && (
-        <MarkDoneModal
-          contest={markingDone}
-          onClose={() => setMarkingDone(null)}
-          onMarkAsDone={onMarkAsDone}
-        />
-      )}
-
-      {markingSkipped && (
-        <SkipContestModal
-          contest={markingSkipped}
-          onClose={() => setMarkingSkipped(null)}
-          onMarkAsSkipped={onMarkAsSkipped}
-        />
-      )}
     </>
   );
 };
