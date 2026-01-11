@@ -2,6 +2,8 @@
 # Contest Manager 
 A full-stack web application to track and manage coding contest participation across multiple platforms.
 
+>  Last Updated: January 11, 2025
+
 ---
 
 <div align="center">
