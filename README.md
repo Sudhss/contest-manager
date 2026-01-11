@@ -26,10 +26,14 @@ A full-stack web application to track and manage coding contest participation ac
 ## Features
 
 ### Contest Management
-- Add, edit, delete contests across **LeetCode, Codeforces, AtCoder, HackerRank, CodeChef, TopCoder**  
-- Mark contests completed with **questions solved count**  
-- Visual indicators for upcoming and past contests  
-- Filter & search contests in real-time
+
+| Feature | Description |
+|---------|-------------|
+| Platform Support | LeetCode, Codeforces, AtCoder, HackerRank, CodeChef, TopCoder |
+| Contest Tracking | Add, edit, delete contests across all supported platforms |
+| Progress Tracking | Mark contests as completed with questions solved count |
+| Visual Indicators | Color-coded status for upcoming and completed contests |
+| Search & Filter | Find contests quickly with real-time search and filtering |
 
 ### Data Persistence
 - MongoDB database for reliable storage  
