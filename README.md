@@ -15,7 +15,7 @@ A full-stack web application to track and manage coding contest participation ac
 
 ---
 
-## Demo
+## Demo :
 
 <div align="center">
   <img src="docs/demo.png" alt="App Screenshot" width="720"/>
