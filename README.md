@@ -1,7 +1,7 @@
 
 # Contest Manager 
 A full-stack web application to track and manage coding contest participation across multiple platforms.
-Uses API to fetch the contests in real time from codeforces, Leetcode, CodeChef, Atcoder
+Uses API to fetch the contests in real time from Codeforces, Leetcode, CodeChef, Atcoder
 
 >  Last Updated: January 11, 2025
 
